@@ -39,3 +39,7 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Promptfoo eval artifacts (regenerate with `promptfoo eval ...`)
+evals/baselines/
+.promptfoo/
