@@ -194,6 +194,8 @@ const SLOT_KEYS_SET = new Set(SLOT_KEYS);
 export function validatePatch(patch) {
   if (!patch || typeof patch !== 'object') return ['patch must be an object'];
   const errs = [];
+  const styledTargets =
+    patch.style && typeof patch.style === 'object' ? new Set(Object.keys(patch.style)) : new Set();
   if (patch.slots && typeof patch.slots === 'object') {
     for (const [slot, val] of Object.entries(patch.slots)) {
       if (!SLOT_KEYS_SET.has(slot)) {
@@ -201,7 +203,14 @@ export function validatePatch(patch) {
         continue;
       }
       if (val === null) continue;
-      errs.push(...validateExpr(val, `slots.${slot}`));
+      const slotErrs = validateExpr(val, `slots.${slot}`);
+      if (slotErrs.length > 0 && styledTargets.has(slot)) {
+        errs.push(
+          `slots.${slot} is malformed AND style.${slot} is also being set — for a pure style change, OMIT slots.${slot} from the patch entirely (slot text content is preserved automatically when you don't include it). Underlying error: ${slotErrs.join('; ')}`,
+        );
+      } else {
+        errs.push(...slotErrs);
+      }
     }
   }
   for (const list of ['hide', 'keepOnly']) {

@@ -40,8 +40,11 @@ const SLOT_KEY_SET = new Set<string>(SLOT_KEYS as readonly string[]);
 // union error.
 function preValidatePatchSlots(patch: unknown): string[] {
   if (!patch || typeof patch !== 'object') return [];
-  const slots = (patch as { slots?: unknown }).slots;
+  const p = patch as { slots?: unknown; style?: unknown };
+  const slots = p.slots;
   if (!slots || typeof slots !== 'object') return [];
+  const styledTargets =
+    p.style && typeof p.style === 'object' ? new Set(Object.keys(p.style)) : new Set<string>();
   const errs: string[] = [];
   for (const [slot, val] of Object.entries(slots as Record<string, unknown>)) {
     if (!SLOT_KEY_SET.has(slot)) {
@@ -56,7 +59,16 @@ function preValidatePatchSlots(patch: unknown): string[] {
       }
       continue;
     }
-    errs.push(...validateExprDetailed(val, `slots.${slot}`));
+    const slotErrs = validateExprDetailed(val, `slots.${slot}`);
+    if (slotErrs.length > 0 && styledTargets.has(slot)) {
+      // Common failure: model includes slots.X alongside style.X for the same target,
+      // botching the slot Expr in an attempt to "preserve" the text. Tell it to drop slots.X.
+      errs.push(
+        `slots.${slot} is malformed AND style.${slot} is also being set — for a pure style change, OMIT slots.${slot} from the patch entirely (slot text content is preserved automatically when you don't include it). Underlying error: ${slotErrs.join('; ')}`,
+      );
+    } else {
+      errs.push(...slotErrs);
+    }
   }
   return errs;
 }

@@ -6,6 +6,7 @@ export const styleCases = [
   { name: 'titles bold', utterance: 'make titles bold', check: { type: 'style', slot: 'title', prop: 'fontWeight' } },
   { name: 'italic author', utterance: 'italicize the author', check: { type: 'style', slot: 'author', prop: 'fontStyle' } },
   { name: 'scores red', utterance: 'make the scores red', check: { type: 'style', slot: 'score', prop: 'color' } },
+  { name: 'titles red', utterance: 'make titles red', check: { type: 'style', slot: 'title', prop: 'color' } },
   { name: 'header bg dark blue', utterance: 'make the header background dark blue', check: { type: 'style', slot: 'header', prop: 'backgroundColor' } },
   { name: 'rounded rows', utterance: 'round the corners of each row', check: { type: 'style', slot: 'row', prop: 'borderRadius' } },
   { name: 'more row padding', utterance: 'add more padding to rows', check: { type: 'styleOneOf', slot: 'row', props: ['padding', 'paddingVertical', 'paddingHorizontal'] } },
